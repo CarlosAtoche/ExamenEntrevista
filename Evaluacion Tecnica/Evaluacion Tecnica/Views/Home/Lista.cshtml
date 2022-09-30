@@ -1,0 +1,25 @@
+
+
+<div class="container">
+    <table class="table table-striped">
+        <tbody>
+            <thead>
+                <tr>
+                    <th>Periodo</th>
+                    <th>Fecha Solicitud</th>
+                    <th>Alumno</th>
+                    <th>Curso</th>
+                </tr> 
+            </thead>
+            @foreach (var item in ViewBag.solicitudes)
+            {
+            <tr>
+                <td>@item.solicitud.Periodo</td>
+                <td>@item.solicitud.FechaSolicitud</td>
+                <td>@item.alumno.Nombres</td>
+                <td></td>
+            </tr>                 
+            }
+        </tbody>
+    </table>
+</div>

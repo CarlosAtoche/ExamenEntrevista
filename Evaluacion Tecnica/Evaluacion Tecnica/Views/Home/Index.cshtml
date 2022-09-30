@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+    
+<div class="card">
+    <div class="card-header">
+        Registro Solicitud
+    </div>
+    <form v-on:submit.prevent="submit">
+    <div class="card-body">
+        <div class="row">
+            <div class="form-group">
+                <label for="Alumno">Alumno:</label>
+                <select name="IdAlumno" id="Alumno" class="form-control" v-model='form.IdAlumno'>
+                    @foreach (var alumno in ViewData["alumnos"] as IEnumerable<Alumno>)
+                    {
+                         <option value="@alumno.IdAlumno">@alumno.Nombres</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="">Fecha Solicitud:</label>
+                <input type="date" name="FechaSolicitud" class="form-control" :min="minDate" required v-model="form.FechaSolicitud">
+            </div>      
+            <div class="form-group">
+                <label for="">Código de Registrante :</label>
+                <input type="number" name="CodRegistrante" class="form-control" required  v-model="form.CodRegistrante">
+            </div>  
+
+            <div class="form-group">
+                <label for="">Carrera :</label>
+                <input type="text" name="Carrera" class="form-control" required v-model="form.carrera" >
+            </div>  
+
+            <div class="form-group">
+                <label for="">Periodo:</label>
+                <input type="month" name="Periodo" class="form-control" required v-model="form.Periodo">
+            </div>  
+
+
+        </div>
+
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Curso</th>
+                    <th>Profesor</th>
+                    <th>Aula</th>
+                    <th>Sede</th>
+                    <th>Observacion</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for='(detalle,idx) in form.DetalleSolicituds'>
+                    <td>
+                        <select v-model="detalle.IdCurso" class="form-control" >
+                            @foreach (var curso in ViewBag.cursos)
+                            {
+                                <option value="@curso.IdCurso">@curso.Nombre</option>
+                            }
+                        </select>
+                    </td>
+                    <td><input type="text" v-model="detalle.Profesor" id="Profesor" class="form-control"></td>
+                    <td><input type="text" v-model="detalle.Aula" id="Aula" class="form-control"></td>
+                    <td><input type="text" v-model="detalle.Sede" id="Sede" class="form-control"></td>
+                    <td>
+                        <input type="text" v-model="detalle.Observacion" id="Observacion" class="form-control">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+      <div class="alert alert-danger" v-show="!isValido"> <span  >Los Cursos no se pueden repetir</span> </div>
+
+        <button type="button" class="btn btn-primary" v-on:click="form.detalles.push({})">Añadir</button>
+
+        <button type="submit" :disabled="!isValido" class="btn btn-primary">Registrar</button>
+
+    </div>
+    </form>
+
+</div>
+
+@section Scripts {
+    <script>
+        const app = new Vue({
+            el: "#app",
+            data:{
+                minDate: new Date().toISOString().substr(0,10),
+                form:{
+                    IdAlumno:'',
+                    FechaSolicitud:'',
+                    CodRegistrante:'',
+                    Carrera:'',
+                    Periodo: '',
+                    DetalleSolicituds:[{}],
+                }
+            },
+            computed:{
+                isValido(){
+                    if(this.form.DetalleSolicituds.length===0) return false;
+                    const validos = new Set;
+                    let isValido = true;
+                    const ids = this.form.DetalleSolicituds.map(e=>e.IdCurso);
+                    if(ids.some(e=> !e )) return false;
+                    ids.forEach(e=>{
+                        if(!e) return;
+                        if(validos.has(e)){
+                            isValido = false;
+                        }else{
+                            validos.add(e);
+                        }
+                    });
+                    return isValido;
+                    
+                }
+            },
+            methods: {
+                async submit(){
+                    const res = await fetch('/Home/Store',{method:"POST",body:JSON.stringify(this.form),headers:{'Content-Type':'application/json'}})
+                    if(res.ok) location.href = '/Home/Lista';
+                    else alert('Errores');
+                }
+            },
+        })
+    </script>
+}
